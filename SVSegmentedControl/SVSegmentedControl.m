@@ -112,7 +112,7 @@
 
 - (void)updateSectionRects {
     
-    int c = [self.sectionTitles count];
+    int c = (int)[self.sectionTitles count];
 	int i = 0;
 	
     [self calculateSegmentWidth];
@@ -155,7 +155,8 @@
         self.segmentWidth = 0;
         int i = 0;
         for(NSString *titleString in self.sectionTitles) {
-            CGFloat stringWidth = [titleString sizeWithFont:self.font].width+(self.titleEdgeInsets.left+self.titleEdgeInsets.right+self.thumbEdgeInset.left+self.thumbEdgeInset.right);
+//            CGFloat stringWidth = [titleString sizeWithFont:self.font].width+(self.titleEdgeInsets.left+self.titleEdgeInsets.right+self.thumbEdgeInset.left+self.thumbEdgeInset.right);
+            CGFloat stringWidth = [titleString sizeWithAttributes:@{NSFontAttributeName:self.font}].width +(self.titleEdgeInsets.left+self.titleEdgeInsets.right+self.thumbEdgeInset.left+self.thumbEdgeInset.right);
             
             if(self.sectionImages.count > i)
                 stringWidth+=[(UIImage*)[self.sectionImages objectAtIndex:i] size].width+5;
@@ -167,8 +168,9 @@
         self.segmentWidth = ceil(self.segmentWidth/2.0)*2; // make it an even number so we can position with center
     }
     else {
-        self.segmentWidth = round(self.frame.size.width/self.sectionTitles.count);
+        self.segmentWidth = roundf(self.frame.size.width/self.sectionTitles.count);
     }
+//    NSLog(@"self.segmentWidth:%f",self.segmentWidth);
 }
 
 #pragma mark - Auto Layout
@@ -190,7 +192,7 @@
 
 - (void)setBounds:(CGRect)bounds {
     [super setBounds:bounds];
-    self.segmentWidth = round(bounds.size.width/self.sectionTitles.count);
+    self.segmentWidth = roundf(bounds.size.width/self.sectionTitles.count);
     [self setupAccessibility];
 }
 
@@ -368,7 +370,7 @@
 	int index;
 	
 	if(self.snapToIndex != -1)
-		index = self.snapToIndex;
+		index = (int)self.snapToIndex;
 	else
 		index = MIN(floor(self.thumb.center.x/self.segmentWidth), self.sectionTitles.count-1);
 	
@@ -592,10 +594,12 @@
 	int i = 0;
 	
 	for(NSString *titleString in self.sectionTitles) {
-        CGSize titleSize = [titleString sizeWithFont:self.font];
+        CGSize titleSize = [titleString sizeWithAttributes:@{NSFontAttributeName:self.font}];//[titleString sizeWithFont:self.font];
         CGFloat titleWidth = titleSize.width;
-        CGFloat posY = round((CGRectGetHeight(rect)-self.font.ascender-5)/2)+self.titleEdgeInsets.top-self.titleEdgeInsets.bottom;
-        //NSLog(@"%@ %f, height=%f, descender=%f, ascender=%f, lineHeight=%f", self.font.familyName, self.font.pointSize, titleSize.height, self.font.descender, self.font.ascender, self.font.lineHeight);
+
+        CGFloat posY = roundf((CGRectGetHeight(rect)-self.font.ascender-5)/2)+self.titleEdgeInsets.top-self.titleEdgeInsets.bottom;
+        // NSLog(@"posY:%f",posY);
+        // NSLog(@"%@ %f, height=%f, descender=%f, ascender=%f, lineHeight=%f, Hrect=%f|| (%f) + top=%f - bottom=%f", self.font.familyName, self.font.pointSize, titleSize.height, self.font.descender, self.font.ascender, self.font.lineHeight,CGRectGetHeight(rect),((CGRectGetHeight(rect)-self.font.ascender-5)/2),self.titleEdgeInsets.top,self.titleEdgeInsets.bottom);
         
         CGFloat imageWidth = 0;
         UIImage *image = nil;
@@ -606,16 +610,21 @@
         }
         
         titleWidth+=imageWidth;
-        CGFloat sectionOffset = round((self.segmentWidth-titleWidth)/2);
+        CGFloat sectionOffset = roundf((self.segmentWidth-titleWidth)/2);
         CGFloat titlePosX = (self.segmentWidth*i)+sectionOffset;
-        
+//        NSLog(@"self.segmentWidth:%f, titleWidth:%f, sectionOffset:%f",self.segmentWidth,titleWidth,sectionOffset);
         if(image)
-            [[self sectionImage:image withTintColor:self.textColor] drawAtPoint:CGPointMake(titlePosX, round((rect.size.height-image.size.height)/2))];
+            [[self sectionImage:image withTintColor:self.textColor] drawAtPoint:CGPointMake(titlePosX, roundf((rect.size.height-image.size.height)/2))];
         
 #if __IPHONE_OS_VERSION_MIN_REQUIRED < 60000
 		[titleString drawAtPoint:CGPointMake(titlePosX+imageWidth, posY) forWidth:self.segmentWidth withFont:self.font lineBreakMode:UILineBreakModeTailTruncation];
 #else
-        [titleString drawAtPoint:CGPointMake(titlePosX+imageWidth, posY) forWidth:self.segmentWidth withFont:self.font lineBreakMode:NSLineBreakByClipping];
+	//Fix for ios 7 deprecated func.
+        // Create string drawing context
+        NSStringDrawingContext *drawingContext = [[NSStringDrawingContext alloc] init];
+        drawingContext.minimumScaleFactor = 0.5; // Half the font size
+        [titleString drawWithRect:CGRectMake(titlePosX+imageWidth, posY, self.segmentWidth, 100.0) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSBaselineOffsetAttributeName:@1,NSFontAttributeName:self.font,NSForegroundColorAttributeName:self.textColor} context:drawingContext];
+ 
 #endif
 		i++;
 	}
