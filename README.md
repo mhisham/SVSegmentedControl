@@ -1,5 +1,8 @@
 # SVSegmentedControl
 
+Note: this update for Fix ios 7 & 8 , Replaced deprecated functions.
+
+
 SVSegmentedControl is a customizable `UIControl` class that mimics `UISegmentedControl` but that looks like an `UISwitch`.
 
 ![SVSegmentedControl](http://f.cl.ly/items/213N0a1k2U2O0F3y053z/svsegmentedcontrol3.png)
