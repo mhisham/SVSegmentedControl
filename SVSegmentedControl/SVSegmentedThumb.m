@@ -272,7 +272,7 @@
 }
 
 - (void)arrangeLabel:(UILabel*)label imageView:(UIImageView*)imageView {
-    CGSize titleSize = [label.text sizeWithFont:self.font];
+    CGSize titleSize = [label.text sizeWithAttributes:@{NSFontAttributeName:self.font}];
     CGFloat titleWidth = titleSize.width;
     CGFloat imageWidth = 0;
     
@@ -281,15 +281,15 @@
         titleWidth += imageWidth;
     }
     
-    CGFloat titlePosX = round((self.bounds.size.width-titleWidth)/2);
+    CGFloat titlePosX = roundf((self.bounds.size.width-titleWidth)/2);
     
     if(imageView.image)
         imageView.frame = CGRectMake(titlePosX,
-                                     round((self.segmentedControl.bounds.size.height-imageView.image.size.height)/2),
+                                     roundf((self.segmentedControl.bounds.size.height-imageView.image.size.height)/2),
                                      imageView.image.size.width,
                                      imageView.image.size.height);
     
-    CGFloat posY = round((self.segmentedControl.height-self.font.ascender-5)/2)+self.segmentedControl.titleEdgeInsets.top-self.segmentedControl.titleEdgeInsets.bottom;
+    CGFloat posY = roundf((self.segmentedControl.height-self.font.ascender-5)/2)+self.segmentedControl.titleEdgeInsets.top-self.segmentedControl.titleEdgeInsets.bottom;
 
     label.frame = CGRectMake(titlePosX+imageWidth,
                              posY,
